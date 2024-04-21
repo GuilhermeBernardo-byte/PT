@@ -10,11 +10,12 @@
             max-width: 600px;
             margin: auto;
             display: block;
+            transform: scaleX(-1); /* Espelhar a imagem */
         }
     </style>
 </head>
 <body>
-    <button onclick="startReading()">Iniciar Leitura do Qr</button>
+    <button onclick="startReading()">Iniciar Leitura Gui</button>
     <video id="video" playsinline style="display: none;"></video>
 
     <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
@@ -29,7 +30,7 @@
                 }
 
                 // Solicitar permissão para acessar a câmera
-                navigator.mediaDevices.getUserMedia({ video: true })
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } })
                 .then(stream => {
                     video.srcObject = stream;
                     video.play();
