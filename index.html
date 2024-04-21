@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,62 +14,36 @@
     </style>
 </head>
 <body>
-    <button onclick="startReading()">Iniciar Leitura</button>
+    <button onclick="startReading()">Iniciar Leitura 1</button>
     <video id="video" playsinline style="display: none;"></video>
 
-    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/instascan@1.0.0/instascan.min.js"></script>
     <script>
         // Função para iniciar a leitura do QR Code
         function startReading() {
             const video = document.getElementById('video');
-            if (!video.srcObject) {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    alert('Seu navegador não suporta a API de getUserMedia');
-                    return;
-                }
+            const scanner = new Instascan.Scanner({ video: video });
 
-                // Solicitar permissão para acessar a câmera
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } })
-                .then(stream => {
-                    video.srcObject = stream;
-                    video.play();
+            scanner.addListener('scan', function (content) {
+                alert('Conteúdo do QR Code: ' + content);
+                // Para a leitura após encontrar um QR Code
+                scanner.stop();
+            });
+
+            Instascan.Camera.getCameras()
+            .then(function (cameras) {
+                if (cameras.length > 0) {
+                    scanner.start(cameras[0]);
                     video.style.display = 'block'; // Exibir o vídeo após a permissão ser concedida
-                    scanQRCode(video);
-                })
-                .catch(err => {
-                    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                        // Permissão negada, exibir mensagem
-                        alert('Permissão para acessar a câmera negada');
-                    } else {
-                        alert('Erro ao acessar a câmera: ' + err.name + ": " + err.message);
-                    }
-                });
-            } else {
-                video.play();
-                scanQRCode(video);
-            }
-        }
-
-        // Função para fazer a leitura do QR Code
-        function scanQRCode(video) {
-            const canvasElement = document.createElement('canvas');
-            const canvas = canvasElement.getContext('2d');
-
-            canvasElement.width = video.videoWidth;
-            canvasElement.height = video.videoHeight;
-
-            setInterval(() => {
-                canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-                const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-                if (code) {
-                    alert('Conteúdo do QR Code: ' + code.data);
-                    // Para a leitura após encontrar um QR Code
-                    video.pause();
+                } else {
+                    alert('Nenhuma câmera encontrada');
                 }
-            }, 200);
+            })
+            .catch(function (err) {
+                alert('Erro ao acessar a câmera: ' + err);
+            });
         }
     </script>
 </body>
 </html>
+
