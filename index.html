@@ -11,34 +11,47 @@
             margin: auto;
             display: block;
         }
+        #qrContent {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <button onclick="startReading()">Iniciar Leitura</button>
+    <button onclick="startReading()">Iniciar Leitura Test</button>
     <video id="video" playsinline style="display: none;"></video>
+    <h1 id="qrContent" style="display: none;"></h1>
 
-    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.18.6/umd@zxing.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
     <script>
         // Função para iniciar a leitura do QR Code
         async function startReading() {
             const video = document.getElementById('video');
-            const codeReader = new ZXing.BrowserQRCodeReader();
+            const qrContent = document.getElementById('qrContent');
 
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = stream;
                 video.play();
                 video.style.display = 'block';
-                
-                const result = await codeReader.decodeFromVideoElement(video, (result, err) => {
-                    if (result) {
-                        alert('Conteúdo do QR Code: ' + result.text);
+
+                const canvasElement = document.createElement('canvas');
+                const canvas = canvasElement.getContext('2d');
+
+                canvasElement.width = video.videoWidth;
+                canvasElement.height = video.videoHeight;
+
+                setInterval(() => {
+                    canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                    const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                    if (code) {
+                        qrContent.textContent = 'Conteúdo do QR Code: ' + code.data;
+                        qrContent.style.display = 'block';
+                        // Para a leitura após encontrar um QR Code
                         video.pause();
-                    } else if (err && !(err instanceof ZXing.NotFoundException)) {
-                        console.error(err);
-                        alert('Erro ao ler o QR Code: ' + err);
                     }
-                });
+                }, 200);
             } catch (err) {
                 console.error(err);
                 alert('Erro ao acessar a câmera: ' + err.message);
