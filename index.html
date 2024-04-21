@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leitor de QR Code</title>
+    <title>Gui</title>
     <style>
         #video {
             width: 100%;
@@ -15,39 +15,38 @@
 </head>
 <body>
     <button onclick="startReading()">Iniciar Leitura</button>
-    <video id="video" playsinline></video>
+    <video id="video" playsinline style="display: none;"></video>
 
     <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
     <script>
-        // Função para solicitar permissão e iniciar a leitura do QR Code
+        // Função para iniciar a leitura do QR Code
         function startReading() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                alert('Seu navegador não suporta a API de getUserMedia');
-                return;
-            }
+            const video = document.getElementById('video');
+            if (!video.srcObject) {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert('Seu navegador não suporta a API de getUserMedia');
+                    return;
+                }
 
-            // Verificar se a permissão já foi concedida
-            if (document.getElementById('video').paused) {
-                alert('Por favor, conceda permissão para acessar a câmera');
-                return;
-            }
-
-            // Solicitar permissão para acessar a câmera
-            navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                const video = document.getElementById('video');
-                video.srcObject = stream;
+                // Solicitar permissão para acessar a câmera
+                navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.play();
+                    scanQRCode();
+                })
+                .catch(err => {
+                    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                        // Permissão negada, exibir mensagem
+                        alert('Permissão para acessar a câmera negada');
+                    } else {
+                        alert('Erro ao acessar a câmera: ' + err.name + ": " + err.message);
+                    }
+                });
+            } else {
                 video.play();
                 scanQRCode();
-            })
-            .catch(err => {
-                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                    // Permissão negada, exibir mensagem
-                    alert('Permissão para acessar a câmera negada');
-                } else {
-                    alert('Erro ao acessar a câmera: ' + err.name + ": " + err.message);
-                }
-            });
+            }
         }
 
         // Função para fazer a leitura do QR Code
