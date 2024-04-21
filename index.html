@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gui</title>
+    <title>Leitor de QR Code</title>
     <style>
         #video {
             width: 100%;
@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-    <button onclick="startReading()">Iniciar Leitura</button>
+    <button onclick="startReading()">Iniciar Leitura do Qr</button>
     <video id="video" playsinline style="display: none;"></video>
 
     <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
@@ -33,6 +33,7 @@
                 .then(stream => {
                     video.srcObject = stream;
                     video.play();
+                    video.style.display = 'block'; // Exibir o vídeo após a permissão ser concedida
                     scanQRCode();
                 })
                 .catch(err => {
