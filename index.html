@@ -10,11 +10,12 @@
             max-width: 600px;
             margin: auto;
             display: block;
-              }
+            transform: scaleX(-1); /* Espelhar a imagem */
+        }
     </style>
 </head>
 <body>
-    <button onclick="startReading()">Iniciar Leitura 8</button>
+    <button onclick="startReading()">Iniciar Leitura 9</button>
     <video id="video" playsinline style="display: none;"></video>
 
     <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
@@ -34,7 +35,7 @@
                     video.srcObject = stream;
                     video.play();
                     video.style.display = 'block'; // Exibir o vídeo após a permissão ser concedida
-                    scanQRCode();
+                    scanQRCode(video);
                 })
                 .catch(err => {
                     if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
@@ -46,13 +47,12 @@
                 });
             } else {
                 video.play();
-                scanQRCode();
+                scanQRCode(video);
             }
         }
 
         // Função para fazer a leitura do QR Code
-        function scanQRCode() {
-            const video = document.getElementById('video');
+        function scanQRCode(video) {
             const canvasElement = document.createElement('canvas');
             const canvas = canvasElement.getContext('2d');
 
