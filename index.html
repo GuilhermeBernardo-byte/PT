@@ -17,7 +17,7 @@
     </style>
 </head>
 <body>
-    <button onclick="startReading()">Iniciar Leitura Test</button>
+    <button onclick="startReading()">Iniciar Leitura</button>
     <video id="video" playsinline style="display: none;"></video>
     <h1 id="qrContent" style="display: none;"></h1>
 
@@ -34,24 +34,24 @@
                 video.play();
                 video.style.display = 'block';
 
-                const canvasElement = document.createElement('canvas');
-                const canvas = canvasElement.getContext('2d');
+                video.addEventListener('play', () => {
+                    const canvasElement = document.createElement('canvas');
+                    const canvas = canvasElement.getContext('2d');
+                    canvasElement.width = video.videoWidth;
+                    canvasElement.height = video.videoHeight;
 
-                canvasElement.width = video.videoWidth;
-                canvasElement.height = video.videoHeight;
+                    setInterval(() => {
+                        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                        const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                        const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-                setInterval(() => {
-                    canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-                    const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-                    if (code) {
-                        qrContent.textContent = 'Conteúdo do QR Code: ' + code.data;
-                        qrContent.style.display = 'block';
-                        // Para a leitura após encontrar um QR Code
-                        video.pause();
-                    }
-                }, 200);
+                        if (code) {
+                            qrContent.textContent = 'Conteúdo do QR Code: ' + code.data;
+                            qrContent.style.display = 'block';
+                            video.pause();
+                        }
+                    }, 200);
+                });
             } catch (err) {
                 console.error(err);
                 alert('Erro ao acessar a câmera: ' + err.message);
