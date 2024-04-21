@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitor de QR Code</title>
+    <style>
+        #video {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="startReading()">Iniciar Leitura</button>
+    <video id="video" playsinline></video>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+    <script>
+        // Função para solicitar permissão e iniciar a leitura do QR Code
+        function startReading() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('Seu navegador não suporta a API de getUserMedia');
+                return;
+            }
+
+            // Verificar se a permissão já foi concedida
+            if (document.getElementById('video').paused) {
+                alert('Por favor, conceda permissão para acessar a câmera');
+                return;
+            }
+
+            // Solicitar permissão para acessar a câmera
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                video.play();
+                scanQRCode();
+            })
+            .catch(err => {
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    // Permissão negada, exibir mensagem
+                    alert('Permissão para acessar a câmera negada');
+                } else {
+                    alert('Erro ao acessar a câmera: ' + err.name + ": " + err.message);
+                }
+            });
+        }
+
+        // Função para fazer a leitura do QR Code
+        function scanQRCode() {
+            const video = document.getElementById('video');
+            const canvasElement = document.createElement('canvas');
+            const canvas = canvasElement.getContext('2d');
+
+            canvasElement.width = video.videoWidth;
+            canvasElement.height = video.videoHeight;
+
+            setInterval(() => {
+                canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                if (code) {
+                    alert('Conteúdo do QR Code: ' + code.data);
+                    // Para a leitura após encontrar um QR Code
+                    video.pause();
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>
